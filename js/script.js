@@ -1,4 +1,3 @@
-window.addEventListener("DOMContentLoaded", function() {
   const html            = document.querySelector("html");
   const navBtn          = document.querySelector(".navbar-btn");
   const navList         = document.querySelector(".navbar-list");
