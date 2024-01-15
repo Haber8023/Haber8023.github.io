@@ -73,7 +73,24 @@
             font-family: monospace; /* 固定宽度字体更适合显示代码或结果 */
             resize: none; /* 禁止调整大小 */
         }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+        .add-row {
+            margin-top: 10px;
+            cursor: pointer;
+        }
     </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.0.0/crypto-js.min.js"></script>
 </head>
 <body>
     <div class="tab">
@@ -95,8 +112,8 @@
         <div class="main-content">
             <div id="kewei-callback" class="content">
                 <h5>可为回调参数构造工具</h5>
-                <label for="businessType">选择回调类型:</label>
-                    <select  id="businessType" onchange="showKeweiSubContent()">
+                <label for="keweiBusinessType">选择回调类型:</label>
+                    <select  id="keweiBusinessType" onchange="showKeweiSubContent()">
                         <option value="1">开卡/充值回调通知</option>
                         <option value="2">退卡回调通知</option>
                         <option value="3">签约状态回调通知</option>
@@ -104,11 +121,10 @@
                         <option value="5">自定义回调通知</option>
                     </select>
                     <div id="kewei-sub-content1" class="sub-content">
-                        <form>
                             <p>url: /transcard/third/kewei/orderNotify</p>
                             <div class="input-box">
                                 <label for="textInput">荣耀侧订单号：</label>
-                                <input type="text" id="textInput" placeholder="请输入orderId">
+                                <input type="text" id="kewei-order-id-input" placeholder="请输入orderId">
                             </div>
                             <div class="input-box">
                                 <label for="textInput">订单状态：</label>
@@ -121,80 +137,94 @@
                                     <option value="6">交易成功</option>
                                 </select>
                             </div>
-                            <div class="input-box">
-                                <label for="textInput">cardType：</label>
-                                <select id="kewei-card-type">
-                                </select>
-                            </div>
-                            <button>确定</button>
-                        </form>
                     </div>
 
                     <div id="kewei-sub-content2" class="sub-content">
-                        <form>
                             <p>url: /transcard/third/kewei/refundNotify</p>
                             <div class="input-box">
                                 <label for="textInput">荣耀侧订单号：</label>
-                                <input type="text" id="textInput" placeholder="请输入orderId">
+                                <input type="text" id="kewei-refund-id-input" placeholder="请输入orderId">
                             </div>
                             <div class="input-box">
                                 <label for="textInput">订单状态：</label>
-                                <input type="text" id="textInput" placeholder="请输入订单状态">
+                                <select id="kewei-refund-status">
+                                    <option value="9">退款成功</option>
+                                    <option value="8">退款失败</option>
+                                    <option value="7">退款中</option>
+                                </select>
                             </div>
-                            <div class="input-box">
-                                <label for="textInput">cardType：</label>
-                                <input type="text" id="textInput" placeholder="请输入cardType">
-                            </div>
-                            <button>确定</button>
-                        </form>
                     </div>
 
                     <div id="kewei-sub-content3" class="sub-content">
-                        <form>
                             <p>url: /transcard/third/kewei/entrustNotify</p>
                             <div class="input-box">
                                 <label for="textInput">荣耀侧订单号：</label>
-                                <input type="text" id="textInput" placeholder="请输入orderId">
+                                <input type="text" id="kewei-entrust-id-input" placeholder="请输入entrustId">
                             </div>
                             <div class="input-box">
                                 <label for="textInput">订单状态：</label>
-                                <input type="text" id="textInput" placeholder="请输入订单状态">
+                                <select id="kewei-entrust-status">
+                                    <option value="0">已签约</option>
+                                    <option value="1">未签约</option>
+                                    <option value="2">已解约</option>
+                                    <option value="9">签约进行中</option>
+                                    <option value="10">解约进行中</option>
+                                </select>
                             </div>
                             <div class="input-box">
-                                <label for="textInput">cardType：</label>
-                                <input type="text" id="textInput" placeholder="请输入cardType">
+                                <label for="textInput">卡类型：</label>
+                                <select id="kewei-card-type-2">
+                                    <option value="3">3-金陵通</option>
+                                </select>
                             </div>
-                            <button>确定</button>
-                        </form>
                     </div>
 
                     <div id="kewei-sub-content4" class="sub-content">
-                        <form>
                             <p>url: /transcard/third/kewei/lockNotify</p>
                             <div class="input-box">
-                                <label for="textInput">荣耀侧订单号：</label>
-                                <input type="text" id="textInput" placeholder="请输入orderId">
+                                <label for="textInput">卡号：</label>
+                                <input type="text" id="kewei-card-no" placeholder="请输入cardNo">
                             </div>
-                            <div class="input-box">
-                                <label for="textInput">订单状态：</label>
-                                <input type="text" id="textInput" placeholder="请输入订单状态">
-                            </div>
-                            <div class="input-box">
-                                <label for="textInput">cardType：</label>
-                                <input type="text" id="textInput" placeholder="请输入cardType">
-                            </div>
-                            <button>确定</button>
-                        </form>
+                        <div class="input-box">
+                            <label for="textInput">操作类型：</label>
+                            <select id="kewei-notify-type">
+                                <option value="0">锁卡</option>
+                                <option value="1">解锁</option>
+                            </select>
+                        </div>
+                        <div class="input-box">
+                            <label for="textInput">卡类型：</label>
+                            <select id="kewei-card-type-3">
+                                <option value="3">3-金陵通</option>
+                            </select>
+                        </div>
                     </div>
 
-                    <div id="kewei-sub-content5" class="sub-content">内容对应自定义</div>
+                    <div class="input-box" id="kewei-card-type-list">
+                        <label for="textInput">卡类型：</label>
+                        <select id="kewei-card-type">
+                        </select>
+                    </div>
+
+                    <div id="kewei-sub-content5" class="sub-content">
+                        <table id="data-table">
+                            <tr>
+                                <th>Key</th>
+                                <th>Value</th>
+                            </tr>
+                            <tr>
+                                <td><input type="text" name="key"></td>
+                                <td><input type="text" name="value"></td>
+                            </tr>
+                        </table>
+                        <div class="add-row">➕ 添加键值对</div>
+                        <p>&emsp;</p>
+                    </div>
+
+                    <button onclick="keweiNotify()">确定</button>
 
                     <h5>输出结果</h5>
-                    <div>   
-                        <textarea class="result-textarea" id="kewei-output" readonly>
-                            这里是输出结果...
-                                </textarea>
-                    </div>
+                    <div><textarea class="result-textarea" id="kewei-output" readonly>这里是输出结果...</textarea></div>
             </div>
             <div id="beijing-callback" class="content">
                 <p>随用随充开通状态</p>
@@ -208,7 +238,8 @@
                     <option value="beijing">北京</option>
                 </select>
                 <button onclick="calculateCardFaceNo()">确定</button>
-                <p id="uid-output"></p>
+                <h5>输出结果</h5>
+                <div><textarea class="result-textarea" id="uid-output" readonly>这里是输出结果...</textarea></div>
             </div>
         </div>
     </div>
@@ -232,7 +263,7 @@
         <h3>TSM</h3>
         <div class="sidebar">
             <button onclick="showContent('cplc-helper')">CPLC助手</button>
-            <button onclick="showContent('tsm-card-locker')">TSM解锁卡回调</button>
+            <button onclick="showContent('tsm-card-locker')">TSM解锁卡回调通知</button>
         </div>
 
         <div class="main-content">
@@ -244,6 +275,8 @@
             </div>
             <div id="tsm-card-locker" class="content">
             </div>
+            <h5>输出结果</h5>
+            <div><textarea class="result-textarea" id="tsm-output" readonly>这里是输出结果...</textarea></div>
         </div>
     </div>
     <script>
@@ -251,7 +284,7 @@
          * 可为回调通知
          */
          function showKeweiSubContent() {
-            var businessType = document.getElementById('businessType').value;
+            var keweiBusinessType = document.getElementById('keweiBusinessType').value;
 
             // 隐藏所有内容块
             var contents = document.getElementsByClassName('sub-content');
@@ -260,9 +293,21 @@
             }
 
             // 显示选中的内容块
-            var selectedContent = document.getElementById('kewei-sub-content' + businessType);
+            var selectedContent = document.getElementById('kewei-sub-content' + keweiBusinessType);
             if (selectedContent) {
                 selectedContent.style.display = 'block';
+            }
+
+            switch (keweiBusinessType) {
+                case "1":
+                case "2":
+                case "5":
+                    document.getElementById("kewei-card-type-list").style.display = 'block';
+                    break;
+                case "3":
+                case "4":
+                    document.getElementById("kewei-card-type-list").style.display = 'none';
+                    break;
             }
         }
 
@@ -271,13 +316,42 @@
             showKeweiSubContent();
             // 假设这是您想要添加的选项列表
             var options = [
-                { text: "选项1", value: "1" },
-                { text: "选项2", value: "2" },
-                { text: "选项3", value: "3" }
+                { text: "1-深圳通", value: "1" },
+                { text: "3-金陵通", value: "3" },
+                { text: "4-连云港", value: "4" },
+                { text: "6-苏州", value: "6" },
+                { text: "7-扬州", value: "7" },
+                { text: "8-盐城", value: "8" },
+                { text: "12-羊城通", value: "12" },
+                { text: "13-广佛通", value: "13" },
+                { text: "14-韶州通", value: "14" },
+                { text: "15-河源粤", value: "15" },
+                { text: "16-红海通", value: "16" },
+                { text: "17-五邑通", value: "17" },
+                { text: "18-漠江通", value: "18" },
+                { text: "19-茂城通", value: "19" },
+                { text: "20-肇庆通", value: "20" },
+                { text: "21-潮州通", value: "21" },
+                { text: "22-榕江通", value: "22" },
+                { text: "23-岭云通", value: "23" },
+                { text: "30-无锡", value: "30" },
+                { text: "31-泰州", value: "31" },
+                { text: "32-常州", value: "32" },
+                { text: "33-淮安", value: "33" },
+                { text: "34-淮海通", value: "34" },
+                { text: "35-南通", value: "35" },
+                { text: "36-镇江", value: "36" },
+                { text: "37-宿迁", value: "37" },
+                { text: "38-苏州昆山", value: "38" },
+                { text: "40-长安通", value: "40" },
+                { text: "46-潇湘卡", value: "46" },
+                { text: "48-泉城通", value: "48" },
+                { text: "49-洪城通", value: "49" },
+                { text: "51-重庆", value: "51" }
             ];
 
             // 获取<select>元素
-            var select = document.getElementById('kewei-card-type');
+            var select = document.getElementById("kewei-card-type");
 
             // 为每个选项创建一个新的<option>元素并添加到<select>中
             options.forEach(function(option) {
@@ -288,16 +362,107 @@
             });
         }
 
-         function getMerchantCodeAndSecretKey(cardType) {
+        function keweiNotify() {
+            var keweiBusinessType = document.getElementById("keweiBusinessType").value;
+            switch (keweiBusinessType) {
+                case "1":
+                    keweiOrderNotify();
+                    break;
+                case "2":
+                    keweiRefundNotify();
+                    break;
+                case "3":
+                    keweiEntrustNotify();
+                    break;
+                case "4":
+                    keweiLockNotify();
+                    break;
+                case "5":
+                    keweiDiyNotify();
+                    break;
+            }
+         }
+
+        function keweiOrderNotify() {
+            var orderNo = document.getElementById("kewei-order-id-input").value;
+            var orderStatus = document.getElementById("kewei-order-status").value;
+            var cardType = document.getElementById("kewei-card-type").value;
+            let dataMap = {
+                orderNo: orderNo,
+                orderStatus: parseInt(orderStatus, 10)
+            };
+            let data = JSON.stringify(dataMap);
+            data = genKeWeiGeneralDto(data, cardType)
+            document.getElementById('kewei-output').value = data;
+         }
+
+        function keweiRefundNotify() {
+            var orderNo = document.getElementById("kewei-refund-id-input").value;
+            var orderStatus = document.getElementById("kewei-refund-status").value;
+            var cardType = document.getElementById("kewei-card-type").value;
+            let dataMap = {
+                refundNo: orderNo,
+                orderStatus: parseInt(orderStatus, 10)
+            };
+            let data = JSON.stringify(dataMap);
+            data = genKeWeiGeneralDto(data, cardType)
+            document.getElementById('kewei-output').value = data;
+         }
+
+         function keweiEntrustNotify() {
+            var entrustId = document.getElementById("kewei-entrust-id-input").value;
+            var entrustStatus = document.getElementById("kewei-entrust-status").value;
+            var cardType = document.getElementById("kewei-card-type-2").value;
+            let dataMap = {
+                entrustId: entrustId,
+                entrustStatus: parseInt(entrustStatus, 10)
+            };
+            let data = JSON.stringify(dataMap);
+            data = genKeWeiGeneralDto(data, cardType)
+            document.getElementById('kewei-output').value = data;
+         }
+
+         function keweiLockNotify() {
+            var cardNo = document.getElementById("kewei-card-no").value;
+            var notifyType = document.getElementById("kewei-notify-type").value;
+            var cardType = document.getElementById("kewei-card-type-3").value;
+            let dataMap = {
+                currentStep: "BOF",
+                cardNo: cardNo,
+                notifyType: parseInt(notifyType, 10)
+            };
+            let data = JSON.stringify(dataMap);
+            data = genKeWeiGeneralDto(data, cardType)
+            document.getElementById('kewei-output').value = data;
+         }
+
+         function keweiDiyNotify() {
+            let rows = document.querySelectorAll('#data-table tr');
+            let jsonData = {};
+            var cardType = document.getElementById("kewei-card-type").value;
+            for (var i = 1; i < rows.length; i++) {
+                let key = rows[i].cells[0].querySelector('input').value;
+                if(!key || key.trim().length == 0) {
+                    continue;
+                }
+                let value = rows[i].cells[1].querySelector('input').value;
+                jsonData[key] = value;
+            }
+            let data = JSON.stringify(jsonData);
+            data = genKeWeiGeneralDto(data, cardType);
+            document.getElementById('kewei-output').value = data;
+         }
+
+         function genKeWeiGeneralDto(data, cardType) {
             let merchantCode = "";
             let secretKey = "";
             switch (cardType) {
-                case 1:
+                case "1":
                     merchantCode = "80000010";
                     secretKey = "3HBJW3DJ6X6CFM4SD5FNAYTQNX45GSH8";
                     break;
-                case 3:
-                case 4:
+                case "3":
+                case "4":
                 case 6:
                 case 7:
                 case 8:
@@ -347,7 +512,19 @@
                     secretKey = "11223344556677889900";
                     break;
             }
-            return {merchantCode, secretKey};
+            let time = Date.now()
+            let sign = md532(data + time + merchantCode + secretKey);
+            let dataMap = {
+                data: data,
+                merchantCode: merchantCode,
+                timestamp: time,
+                sign: sign
+            };
+            return JSON.stringify(dataMap);
+        }
+
+        function md532(str) {
+            return CryptoJS.MD5(str).toString();
         }
     </script>
     <script>
@@ -459,9 +636,15 @@
 
         // 默认打开"交通卡"标签
         document.getElementById("defaultOpen").click();
+
+        document.querySelector('.add-row').addEventListener('click', function() {
+            var table = document.getElementById('data-table');
+            var newRow = table.insertRow();
+            var cell1 = newRow.insertCell(0);
+            var cell2 = newRow.insertCell(1);
+            cell1.innerHTML = '<input type="text" name="key">';
+            cell2.innerHTML = '<input type="text" name="value">';
+        });
     </script>
-    
-    <!-- 尾部用户自定义相关内容 -->
-<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/z16.model.json"},"display":{"position":"right","width":150,"height":300},"mobile":{"show":true},"react":{"opacity":0.7},"log":false});</script></body>
 </body>
 </html>
