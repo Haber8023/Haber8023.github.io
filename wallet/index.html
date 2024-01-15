@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>卡包工具箱</title>
+    <style>
+        /* 内嵌CSS */
+        body { font-family: Arial; }
+
+        .tab {
+            overflow: hidden;
+            border: 1px solid #ccc;
+            background-color: #f1f1f1;
+        }
+
+        .tab button {
+            background-color: inherit;
+            float: left;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            padding: 14px 16px;
+            transition: 0.3s;
+        }
+
+        .tab button:hover { background-color: #ddd; }
+
+        .tab button.active { background-color: #ccc; }
+
+        .tabcontent {
+            display: none;
+            padding: 6px 12px;
+            border: 1px solid #ccc;
+            border-top: none;
+        }
+
+        .main-content {
+            float: left;
+            width: 70%;
+            padding: 20px;
+        }
+
+        .sidebar button {
+            width: 10%;
+            padding: 10px;
+            margin: 5px 0;
+        }
+
+        .content {
+            display: none;
+        }
+
+        .sub-content {
+            display: none;
+        }
+
+        .active-content {
+            display: block;
+        }
+
+        .input-box {
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+
+        .result-textarea {
+            width: 100%;
+            height: 150px; /* 或根据需要调整高度 */
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: #f9f9f9; /* 灰色背景表示不可编辑 */
+            font-family: monospace; /* 固定宽度字体更适合显示代码或结果 */
+            resize: none; /* 禁止调整大小 */
+        }
+    </style>
+</head>
+<body>
+    <div class="tab">
+        <button class="tablinks" onclick="openCard(event, 'TrafficCard')" id="defaultOpen">交通卡</button>
+        <button class="tablinks" onclick="openCard(event, 'AccessCard')">门禁卡</button>
+        <button class="tablinks" onclick="openCard(event, 'CarKey')">车钥匙</button>
+        <button class="tablinks" onclick="openCard(event, 'CapmpusCard')">校园卡</button>
+        <button class="tablinks" onclick="openCard(event, 'TSM')">TSM</button>
+    </div>
+
+    <div id="TrafficCard" class="tabcontent">
+        <h3>交通卡</h3>
+        <div class="sidebar">
+            <button onclick="showContent('kewei-callback')">可为回调通知</button>
+            <button onclick="showContent('beijing-callback')">北京回调通知</button>
+            <button onclick="showContent('card-face-no-calculator')">卡号助手</button>
+        </div>
+
+        <div class="main-content">
+            <div id="kewei-callback" class="content">
+                <h5>可为回调参数构造工具</h5>
+                <label for="businessType">选择回调类型:</label>
+                    <select  id="businessType" onchange="showKeweiSubContent()">
+                        <option value="1">开卡/充值回调通知</option>
+                        <option value="2">退卡回调通知</option>
+                        <option value="3">签约状态回调通知</option>
+                        <option value="4">解/锁卡回调通知</option>
+                        <option value="5">自定义回调通知</option>
+                    </select>
+                    <div id="kewei-sub-content1" class="sub-content">
+                        <form>
+                            <p>url: /transcard/third/kewei/orderNotify</p>
+                            <div class="input-box">
+                                <label for="textInput">荣耀侧订单号：</label>
+                                <input type="text" id="textInput" placeholder="请输入orderId">
+                            </div>
+                            <div class="input-box">
+                                <label for="textInput">订单状态：</label>
+                                <select id="kewei-order-status">
+                                    <option value="3">支付成功</option>
+                                    <option value="2">支付失败</option>
+                                    <option value="9">退款成功</option>
+                                    <option value="8">退款失败</option>
+                                    <option value="7">退款中</option>
+                                    <option value="6">交易成功</option>
+                                </select>
+                            </div>
+                            <div class="input-box">
+                                <label for="textInput">cardType：</label>
+                                <select id="kewei-card-type">
+                                </select>
+                            </div>
+                            <button>确定</button>
+                        </form>
+                    </div>
+
+                    <div id="kewei-sub-content2" class="sub-content">
+                        <form>
+                            <p>url: /transcard/third/kewei/refundNotify</p>
+                            <div class="input-box">
+                                <label for="textInput">荣耀侧订单号：</label>
+                                <input type="text" id="textInput" placeholder="请输入orderId">
+                            </div>
+                            <div class="input-box">
+                                <label for="textInput">订单状态：</label>
+                                <input type="text" id="textInput" placeholder="请输入订单状态">
+                            </div>
+                            <div class="input-box">
+                                <label for="textInput">cardType：</label>
+                                <input type="text" id="textInput" placeholder="请输入cardType">
+                            </div>
+                            <button>确定</button>
+                        </form>
+                    </div>
+
+                    <div id="kewei-sub-content3" class="sub-content">
+                        <form>
+                            <p>url: /transcard/third/kewei/entrustNotify</p>
+                            <div class="input-box">
+                                <label for="textInput">荣耀侧订单号：</label>
+                                <input type="text" id="textInput" placeholder="请输入orderId">
+                            </div>
+                            <div class="input-box">
+                                <label for="textInput">订单状态：</label>
+                                <input type="text" id="textInput" placeholder="请输入订单状态">
+                            </div>
+                            <div class="input-box">
+                                <label for="textInput">cardType：</label>
+                                <input type="text" id="textInput" placeholder="请输入cardType">
+                            </div>
+                            <button>确定</button>
+                        </form>
+                    </div>
+
+                    <div id="kewei-sub-content4" class="sub-content">
+                        <form>
+                            <p>url: /transcard/third/kewei/lockNotify</p>
+                            <div class="input-box">
+                                <label for="textInput">荣耀侧订单号：</label>
+                                <input type="text" id="textInput" placeholder="请输入orderId">
+                            </div>
+                            <div class="input-box">
+                                <label for="textInput">订单状态：</label>
+                                <input type="text" id="textInput" placeholder="请输入订单状态">
+                            </div>
+                            <div class="input-box">
+                                <label for="textInput">cardType：</label>
+                                <input type="text" id="textInput" placeholder="请输入cardType">
+                            </div>
+                            <button>确定</button>
+                        </form>
+                    </div>
+
+                    <div id="kewei-sub-content5" class="sub-content">内容对应自定义</div>
+
+                    <h5>输出结果</h5>
+                    <div>   
+                        <textarea class="result-textarea" id="kewei-output" readonly>
+                            这里是输出结果...
+                                </textarea>
+                    </div>
+            </div>
+            <div id="beijing-callback" class="content">
+                <p>随用随充开通状态</p>
+                <p>随用随充订单充值</p>
+            </div>
+            <div id="card-face-no-calculator" class="content">
+                <h5>卡面号计算</h5>
+                <input type="text" id="uid-input" placeholder="请输入逻辑卡号">
+                <select id="city-select">
+                    <option value="shanghai">上海</option>
+                    <option value="beijing">北京</option>
+                </select>
+                <button onclick="calculateCardFaceNo()">确定</button>
+                <p id="uid-output"></p>
+            </div>
+        </div>
+    </div>
+
+    <div id="AccessCard" class="tabcontent">
+        <h3>门禁卡</h3>
+        <p>暂无可用工具</p>
+    </div>
+
+    <div id="CarKey" class="tabcontent">
+        <h3>车钥匙</h3>
+        <p>暂无可用工具</p>
+    </div>
+
+    <div id="CapmpusCard" class="tabcontent">
+        <h3>校园卡</h3>
+        <p>暂无可用工具</p>
+    </div>
+
+    <div id="TSM" class="tabcontent">
+        <h3>TSM</h3>
+        <div class="sidebar">
+            <button onclick="showContent('cplc-helper')">CPLC助手</button>
+            <button onclick="showContent('tsm-card-locker')">TSM解锁卡回调通知</button>
+        </div>
+
+        <div class="main-content">
+            <div id="cplc-helper" class="content">
+                <h5>seid计算</h5>
+                <input type="text" style="width:40%" id="cplc-input" placeholder="请输入CPLC">
+                <button onclick="calculateSeid()">确定</button>
+                <p id="cplc-output"></p>
+            </div>
+            <div id="tsm-card-locker" class="content">
+            </div>
+        </div>
+    </div>
+    <script>
+        /*
+         * 可为回调通知
+         */
+         function showKeweiSubContent() {
+            var businessType = document.getElementById('businessType').value;
+
+            // 隐藏所有内容块
+            var contents = document.getElementsByClassName('sub-content');
+            for (var i = 0; i < contents.length; i++) {
+                contents[i].style.display = 'none';
+            }
+
+            // 显示选中的内容块
+            var selectedContent = document.getElementById('kewei-sub-content' + businessType);
+            if (selectedContent) {
+                selectedContent.style.display = 'block';
+            }
+        }
+
+        window.onload = function() {
+            // 初始化时显示第一个内容块
+            showKeweiSubContent();
+            // 假设这是您想要添加的选项列表
+            var options = [
+                { text: "选项1", value: "1" },
+                { text: "选项2", value: "2" },
+                { text: "选项3", value: "3" }
+            ];
+
+            // 获取<select>元素
+            var select = document.getElementById('kewei-card-type');
+
+            // 为每个选项创建一个新的<option>元素并添加到<select>中
+            options.forEach(function(option) {
+                var optionElement = document.createElement('option');
+                optionElement.text = option.text;
+                optionElement.value = option.value;
+                select.add(optionElement);
+            });
+        }
+
+         function getMerchantCodeAndSecretKey(cardType) {
+            let merchantCode = "";
+            let secretKey = "";
+            switch (cardType) {
+                case 1:
+                    merchantCode = "80000010";
+                    secretKey = "3HBJW3DJ6X6CFM4SD5FNAYTQNX45GSH8";
+                    break;
+                case 3:
+                case 4:
+                case 6:
+                case 7:
+                case 8:
+                case 30:
+                case 31:
+                case 32:
+                case 33:
+                case 34:
+                case 35:
+                case 36:
+                case 37:
+                case 38:
+                case 51:
+                    merchantCode = "80000009";
+                    secretKey = "11223344556677889900";
+                    break;
+                case 12:
+                case 13:
+                case 14:
+                case 15:
+                case 16:
+                case 17:
+                case 18:
+                case 19:
+                case 20:
+                case 21:
+                case 22:
+                case 23:
+                    merchantCode = "80000013";
+                    secretKey = "11223344556677889900";
+                    break;
+                case 40:
+                    merchantCode = "80000007";
+                    secretKey = "A7CCD7F0790DF2C274F8ADA16972981D";
+                    break;
+                case 42:
+                    merchantCode = "80000002";
+                    secretKey = "11223344556677889900";
+                    break;
+                case 46:
+                case 48:
+                    merchantCode = "80000007";
+                    secretKey = "11223344556677889900";
+                    break;
+                case 49:
+                    merchantCode = "80000008";
+                    secretKey = "11223344556677889900";
+                    break;
+            }
+            return {merchantCode, secretKey};
+        }
+    </script>
+    <script>
+        /*
+         * 北京回调通知
+         */
+    </script>
+    <script>
+        /*
+         * 卡号助手
+         */
+        function calculateCardFaceNo() {
+            document.getElementById("uid-output").innerText = "";
+            var uid = document.getElementById("uid-input").value;
+            var selectedCityValue = document.getElementById('city-select').value;
+            if(selectedCityValue == "shanghai") {
+                uid = calculateShangHaiCardFaceNo(uid);
+            } else if(selectedCityValue == "beijing") {
+                uid = uid.slice(0, -4);
+            }
+            document.getElementById("uid-output").innerText = uid;
+        }
+
+        function calculateShangHaiCardFaceNo(uid) {
+            var uidHex = uid.slice(-8);
+            var byteArray = [];
+            for (var i = 0; i < uidHex.length; i += 2) {
+                byteArray.push(parseInt(uidHex.substr(i, 2), 16));
+            }   
+            var uidBCD = 0;
+            for (var j = 0; j < byteArray.length; j++) {
+                uidBCD = (uidBCD << 8) | (byteArray[j] & 0xFF);
+            }
+            var sum = 0;
+            var isEven = true;
+            var temp = uidBCD;
+            while (temp > 0) {
+                var digit = temp % 10;
+                if (isEven) {
+                    sum += (digit * 2) % 10 + Math.floor((digit * 2) / 10);
+                } else {
+                    sum += digit;
+                }
+                temp = Math.floor(temp / 10);
+                isEven = !isEven;
+            }
+            var checkNum = ((10 - (sum % 10)) % 10).toString();
+            var bcdString = uidBCD.toString().padStart(10, '0');
+            var reversedBCDString = '';
+            for (var k = bcdString.length - 1; k >= 0; k -= 2) {
+                if (k > 0) {
+                    reversedBCDString += bcdString[k - 1] + bcdString[k];
+                }
+            }
+            return checkNum + reversedBCDString;
+        }
+    </script>
+    <script>
+        /*
+         * CPLC助手
+         */
+         function calculateSeid() {
+            document.getElementById("cplc-output").innerText = "";
+            var cplc = document.getElementById("cplc-input").value;
+            var CPLC_MIN_LENGTH = 36;
+            var seid = null;
+
+            if (cplc.length >= CPLC_MIN_LENGTH) {
+                seid = (cplc.substring(0, 4) + cplc.substring(20, 36)).toUpperCase();
+            }
+            document.getElementById("cplc-output").innerText = seid;
+        }
+    </script>
+    <script>
+        /*
+         * TSM解锁卡回调通知
+         */
+    </script>
+    <script>
+        // 内嵌JavaScript
+        function showContent(contentId) {
+            var contents = document.getElementsByClassName("content");
+            for (var i = 0; i < contents.length; i++) {
+                contents[i].style.display = 'none';
+            }
+
+            document.getElementById(contentId).style.display = 'block';
+        }
+
+        function openCard(evt, cardName) {
+            var i, tabcontent, tablinks;
+
+            // 隐藏所有元素带有tabcontent类的元素
+            tabcontent = document.getElementsByClassName("tabcontent");
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].style.display = "none";
+            }
+
+            // 移除所有按钮的"active"状态
+            tablinks = document.getElementsByClassName("tablinks");
+            for (i = 0; i < tablinks.length; i++) {
+                tablinks[i].className = tablinks[i].className.replace(" active", "");
+            }
+
+            // 显示当前标签，并添加"active"状态
+            document.getElementById(cardName).style.display = "block";
+            evt.currentTarget.className += " active";
+        }
+
+        // 默认打开"交通卡"标签
+        document.getElementById("defaultOpen").click();
+    </script>
+</body>
+</html>
