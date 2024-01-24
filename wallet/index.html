@@ -225,6 +225,8 @@
 
                     <h5>输出结果</h5>
                     <div><textarea class="result-textarea" id="kewei-output" readonly>这里是输出结果...</textarea></div>
+                    <button onclick="keweiSendDev()">发送到开发环境</button>
+                    <button onclick="keweiSendTest()">发送到测试环境</button>
             </div>
             <div id="beijing-callback" class="content">
                 <p>随用随充开通状态</p>
@@ -263,7 +265,7 @@
         <h3>TSM</h3>
         <div class="sidebar">
             <button onclick="showContent('cplc-helper')">CPLC助手</button>
-            <button onclick="showContent('tsm-card-locker')">TSM解锁卡回调通知</button>
+            <button onclick="showContent('tsm-card-locker')">TSM解锁卡回调</button>
         </div>
 
         <div class="main-content">
@@ -271,9 +273,28 @@
                 <h5>seid计算</h5>
                 <input type="text" style="width:40%" id="cplc-input" placeholder="请输入CPLC">
                 <button onclick="calculateSeid()">确定</button>
-                <p id="cplc-output"></p>
             </div>
             <div id="tsm-card-locker" class="content">
+                <p>url: /transcard/third/notifyCardLock</p>
+                <div class="input-box">
+                    <label for="textInput">卡号：</label>
+                    <input type="text" id="tsm-card-no-input" placeholder="请输入cardNo">
+                </div>
+                <div class="input-box">
+                    <label for="textInput">CPLC：</label>
+                    <input type="text" id="tsm-cplc-input" placeholder="请输入CPLC">
+                </div>
+                <div class="input-box">
+                    <label for="textInput">原因：</label>
+                    <input type="text" id="tsm-reason-input" placeholder="请输入原因">
+                </div>
+                <div class="input-box">
+                    <label for="textInput">操作类型：</label>
+                    <select id="tsm-operation-type">
+                        <option value="1">锁卡</option>
+                        <option value="2">解锁</option>
+                    </select>
+                </div>
             </div>
             <h5>输出结果</h5>
             <div><textarea class="result-textarea" id="tsm-output" readonly>这里是输出结果...</textarea></div>
@@ -381,6 +402,45 @@
                     keweiDiyNotify();
                     break;
             }
+         }
+
+         function keweiSendDev() {
+            const url = 'https://card-test-drcn.wallet.hihonorcloud.com/transcard/third/kewei/lockNotify';
+            const data = document.getElementById('kewei-output').value;
+
+const xhr = new XMLHttpRequest();
+xhr.open('POST', url, true);
+xhr.setRequestHeader('Content-Type', 'application/json');
+
+xhr.onreadystatechange = function () {
+  if (xhr.readyState === 4 && xhr.status === 200) {
+    const response = JSON.parse(xhr.responseText);
+    console.log('Success:', response);
+  } else if (xhr.readyState === 4) {
+    console.error('Error:', xhr.status);
+  }
+};
+
+            xhr.send(data);
+         }
+
+         function keweiSendTest() {
+            const url = 'https://card-test-drcn.wallet.hihonorcloud.com/transcard/third/kewei/lockNotify';
+            const data = document.getElementById('kewei-output').value;
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    },
+                body: data,
+                })
+                .then(response => response.json())
+                .then(data => {
+                console.log('Success:', data);
+                })
+                .catch(error => {
+                console.error('Error:', error);
+            });
          }
 
         function keweiOrderNotify() {
@@ -587,7 +647,7 @@
          * CPLC助手
          */
          function calculateSeid() {
-            document.getElementById("cplc-output").innerText = "";
+            document.getElementById("tsm-output").innerText = "";
             var cplc = document.getElementById("cplc-input").value;
             var CPLC_MIN_LENGTH = 36;
             var seid = null;
@@ -595,7 +655,7 @@
             if (cplc.length >= CPLC_MIN_LENGTH) {
                 seid = (cplc.substring(0, 4) + cplc.substring(20, 36)).toUpperCase();
             }
-            document.getElementById("cplc-output").innerText = seid;
+            document.getElementById("tsm-output").innerText = seid;
         }
     </script>
     <script>
