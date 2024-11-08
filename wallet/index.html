@@ -265,7 +265,7 @@
         <h3>TSM</h3>
         <div class="sidebar">
             <button onclick="showContent('cplc-helper')">CPLC助手</button>
-            <button onclick="showContent('tsm-card-locker')">TSM解锁卡回调</button>
+            <button onclick="showContent('tsm-card-locker')">deepLink跳转</button>
         </div>
 
         <div class="main-content">
@@ -275,29 +275,28 @@
                 <button onclick="calculateSeid()">确定</button>
             </div>
             <div id="tsm-card-locker" class="content">
-                <p>url: /transcard/third/notifyCardLock</p>
+                <p>tsmClient://card?</p>
                 <div class="input-box">
-                    <label for="textInput">卡号：</label>
-                    <input type="text" id="tsm-card-no-input" placeholder="请输入cardNo">
+                    <label for="textInput">businessId：</label>
+                    <input type="text" id="deeplink-business-id" placeholder="campus_card">
                 </div>
                 <div class="input-box">
-                    <label for="textInput">CPLC：</label>
-                    <input type="text" id="tsm-cplc-input" placeholder="请输入CPLC">
+                    <label for="textInput">action：</label>
+                    <input type="text" id="deeplink-action" placeholder="issue">
                 </div>
                 <div class="input-box">
-                    <label for="textInput">原因：</label>
-                    <input type="text" id="tsm-reason-input" placeholder="请输入原因">
+                    <label for="textInput">cid：</label>
+                    <input type="text" id="deeplink-cid" placeholder="synjones">
                 </div>
                 <div class="input-box">
-                    <label for="textInput">操作类型：</label>
-                    <select id="tsm-operation-type">
-                        <option value="1">锁卡</option>
-                        <option value="2">解锁</option>
-                    </select>
+                    <label for="textInput">extra：</label>
+                    <input type="text" id="deeplink-extra" placeholder="">
                 </div>
+                <button onclick="genDeepLink()">确定</button>
             </div>
             <h5>输出结果</h5>
-            <div><textarea class="result-textarea" id="tsm-output" readonly>这里是输出结果...</textarea></div>
+            <div><textarea class="result-textarea" id="deeplink-output" readonly>这里是输出结果...</textarea></div>
+            <button onclick="jumpDeepLink()">跳转</button>
         </div>
     </div>
     <script>
@@ -656,6 +655,27 @@ xhr.onreadystatechange = function () {
                 seid = (cplc.substring(0, 4) + cplc.substring(20, 36)).toUpperCase();
             }
             document.getElementById("tsm-output").innerText = seid;
+        }
+
+        function genDeepLink() {
+            document.getElementById("deeplink-output").innerText = "";
+            var businessId = document.getElementById("deeplink-business-id").value;
+            var action = document.getElementById("deeplink-action").value;
+            var cid = document.getElementById("cid").value;
+            var extra = document.getElementById("extra").value;
+            var deeplink = "tsmClient://card?businessId=" + businessId + "&action=" + action + "&cid=" + cid + "&extra=" + extra
+            document.getElementById("deeplink-output").innerText = deeplink;
+        }
+
+        function jumpDeepLink() {
+            var deeplink = document.getElementById("deeplink-output").value;
+            // 检查 deeplink 是否有效
+            if (deeplink) {
+                // 使用 window.location.href 来拉起 deeplink
+                window.location.href = deeplink;
+            } else {
+                console.error("无效的 deeplink");
+            }
         }
     </script>
     <script>
