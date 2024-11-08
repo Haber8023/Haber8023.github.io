@@ -275,7 +275,6 @@
                 <button onclick="calculateSeid()">确定</button>
             </div>
             <div id="tsm-card-locker" class="content">
-                <p>tsmClient://card?</p>
                 <div class="input-box">
                     <label for="textInput">businessId：</label>
                     <input type="text" id="deeplink-business-id" placeholder="campus_card">
@@ -658,13 +657,14 @@ xhr.onreadystatechange = function () {
         }
 
         function genDeepLink() {
-            document.getElementById("deeplink-output").innerText = "";
+            document.getElementById("deeplink-output").innerText = ""; // 清空输出区域
             var businessId = document.getElementById("deeplink-business-id").value;
             var action = document.getElementById("deeplink-action").value;
-            var cid = document.getElementById("cid").value;
-            var extra = document.getElementById("extra").value;
-            var deeplink = "tsmClient://card?businessId=" + businessId + "&action=" + action + "&cid=" + cid + "&extra=" + extra
-            document.getElementById("deeplink-output").innerText = deeplink;
+            var cid = document.getElementById("deeplink-cid").value;
+            var extra = document.getElementById("deeplink-extra").value;
+            // 使用正确的连接符号
+            var deeplink = "tsmClient://card?businessId=" + businessId + "&action=" + action + "&cid=" + cid + "&extra=" + extra;
+            document.getElementById("deeplink-output").innerText = deeplink; // 显示生成的 deeplink
         }
 
         function jumpDeepLink() {
