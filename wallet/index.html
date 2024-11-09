@@ -669,7 +669,7 @@ xhr.onreadystatechange = function () {
             var extra = document.getElementById("deeplink-extra").value;
             var pageId = document.getElementById("deeplink-page-id").value;
             // 使用正确的连接符号
-            var deeplink = "tsmClient://card?businessId=" + businessId + "&action=" + action + "&cid=" + cid + "&pageId=" + pageId;+ "&extra=" + extra;
+            var deeplink = "tsmClient://card?businessId=" + businessId + "&action=" + action + "&cid=" + cid + "&pageId=" + pageId + "&extra=" + extra;
             document.getElementById("deeplink-output").innerText = deeplink; // 显示生成的 deeplink
         }
 
