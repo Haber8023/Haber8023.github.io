@@ -278,6 +278,10 @@
             <div id="tsm-card-locker" class="content">
                 <div class="input-box">
                     <label for="textInput">businessId：</label>
+                    <input type="text" id="deeplink-index" placeholder="" value="tsmClient://card">
+                </div>
+                <div class="input-box">
+                    <label for="textInput">businessId：</label>
                     <input type="text" id="deeplink-business-id" placeholder="">
                 </div>
                 <div class="input-box">
@@ -299,7 +303,7 @@
                 <button onclick="genDeepLink()">确定</button>
             </div>
             <h5>输出结果</h5>
-            <div><textarea class="result-textarea" id="deeplink-output">这里是输出结果...</textarea></div>
+            <div><textarea class="result-textarea" id="deeplink-output">?businessId=&action=&cid=&pageId=&extra=</textarea></div>
             <button onclick="jumpDeepLink()">跳转</button>
         </div>
     </div>
@@ -663,13 +667,14 @@ xhr.onreadystatechange = function () {
 
         function genDeepLink() {
             document.getElementById("deeplink-output").innerText = ""; // 清空输出区域
+            var index = document.getElementById("deeplink-business-id").value;
             var businessId = document.getElementById("deeplink-business-id").value;
             var action = document.getElementById("deeplink-action").value;
             var cid = document.getElementById("deeplink-cid").value;
             var extra = document.getElementById("deeplink-extra").value;
             var pageId = document.getElementById("deeplink-page-id").value;
             // 使用正确的连接符号
-            var deeplink = "tsmClient://card?businessId=" + businessId + "&action=" + action + "&cid=" + cid + "&pageId=" + pageId + "&extra=" + extra;
+            var deeplink = index + "?businessId=" + businessId + "&action=" + action + "&cid=" + cid + "&pageId=" + pageId + "&extra=" + extra;
             document.getElementById("deeplink-output").innerText = deeplink; // 显示生成的 deeplink
         }
 
