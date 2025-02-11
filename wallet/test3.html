@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>联调验证工具</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+        }
+        .navbar {
+            background-color: #333;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        .navbar ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+        }
+        .navbar ul li {
+            margin-right: 20px;
+        }
+        .navbar ul li a {
+            color: white;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .navbar ul li a.active {
+            color: #4CAF50;
+            font-weight: bold;
+        }
+        .code-container {
+            background-color: #f5f5f5;
+            padding: 20px;
+            border-radius: 5px;
+            overflow: auto;
+            height: 500px;
+            width: 100%;
+        }
+        pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-family: Courier New, Courier, monospace;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        .code-title {
+            margin-bottom: 15px;
+            color: #333;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <ul>
+            <li><a href="test.html">排序验证</a></li>
+            <li><a href="test2.html">哈希验证</a></li>
+            <li><a href="test3.html" class="active">签名验证</a></li>
+        </ul>
+    </div>
+    
+    <div class="content">
+        <div class="code-container" id="sort-container">
+            <h3 class="code-title">示例代码</h3>
+            <pre>
+                import java.security.PublicKey;
+                import java.security.PrivateKey;
+                import java.security.KeyFactory;
+                import java.security.spec.X509EncodedKeySpec;
+                import java.security.spec.PKCS8EncodedKeySpec;
+                import javax.crypto.Cipher;
+                import java.util.Base64;
+                import java.security.Signature;
+                
+                import org.bouncycastle.jce.provider.BouncyCastleProvider;
+                
+                public class RsaUtil {
+                    private static BouncyCastleProvider bouncyCastleProvider = null;
+                    
+                    static {
+                        if (bouncyCastleProvider == null) {
+                            bouncyCastleProvider = new BouncyCastleProvider();
+                        }
+                    }
+                
+                    // 对哈希值进行签名，返回 Base64 编码的签名字符串
+                    public static String sign(String data, PrivateKey privateKey) throws Exception {
+                        // 计算 SHA-256 哈希值
+                        byte[] hashValue = HashUtil.sha256(data);
+                        
+                        // 签名
+                        Signature signature = Signature.getInstance("SHA256withRSA/PSS", bouncyCastleProvider);
+                        signature.initSign(privateKey);
+                        signature.update(hashValue);
+                        byte[] signedData = signature.sign();
+                        
+                        // 返回 Base64 编码的签名字符串
+                        return Base64.getEncoder().encodeToString(signedData);
+                    }
+                    
+                    // 验证签名，入参为 Base64 编码的签名字符串
+                    public static boolean verify(String data, String base64Signature, PublicKey publicKey) throws Exception {
+                        // 计算 SHA-256 哈希值
+                        byte[] hashValue = HashUtil.sha256(data);
+                        
+                        // 解码 Base64 签名
+                        byte[] signatureBytes = Base64.getDecoder().decode(base64Signature);
+                        
+                        // 验证签名
+                        Signature signature = Signature.getInstance("SHA256withRSA/PSS", bouncyCastleProvider);
+                        signature.initVerify(publicKey);
+                        signature.update(hashValue);
+                        return signature.verify(signatureBytes);
+                    }
+                    
+                    public static void main(String[] args) {
+                        try {
+                            // 示例1：生成密钥对、签名和输出签名
+                            PrivateKey privateKey = ...; // 获取你的私钥
+                
+                            String dataToSign = "Hello, World!";
+                            String signature = sign(dataToSign, privateKey);
+                
+                            System.out.println("Base64 Signature: " + signature);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                        
+                        try {
+                            // 示例2：获取公钥和签名进行验证
+                            PublicKey publicKey = ...; // 获取你的公钥
+                            String base64Signature = ...; // 从请求头/响应头获取的签名
+                            String dataToVerify = "Hello, World!";
+                
+                            boolean isVerified = verify(dataToVerify, base64Signature, publicKey);
+                            System.out.println("Signature verified: " + isVerified);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+                
+            </pre>
+        </div>
+    </div>
+</body>
+</html>
