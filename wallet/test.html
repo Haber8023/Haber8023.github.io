@@ -1,1 +1,218 @@
 
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>联调验证工具</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+        }
+        .navbar {
+            background-color: #333;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        .navbar ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+        }
+        .navbar ul li {
+            margin-right: 20px;
+        }
+        .navbar ul li a {
+            color: white;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .navbar ul li a.active {
+            color: #4CAF50;
+            font-weight: bold;
+        }
+        .code-container {
+            background-color: #f5f5f5;
+            padding: 20px;
+            border-radius: 5px;
+            overflow: auto;
+            height: 500px;
+            width: 100%;
+        }
+        pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-family: Courier New, Courier, monospace;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        .code-title {
+            margin-bottom: 15px;
+            color: #333;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <ul>
+            <li><a href="test.html" class="active">排序验证</a></li>
+            <li><a href="test2.html">哈希验证</a></li>
+            <li><a href="test3.html">签名验证</a></li>
+        </ul>
+    </div>
+    
+    <div class="content">
+        <div class="code-container" id="sort-container">
+            <h3 class="code-title">示例代码</h3>
+            <pre>
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+
+public class JsonSorter {
+    public static void main(String[] args) {
+        String jsonString = "{\n" +
+                "\t\"passTypeIdentifier\": \"OEM_XX\",\n" +
+                "\t\"fields\": {\n" +
+                "\t\t\"commonFields\": [{\n" +
+                "\t\t\t\"key\": \"backgroundImage\",\n" +
+                "\t\t\t\"value\": \"https://assets.stickpng.com/thumbs/580b585b2edbce24c47b2ca9.png\"\n" +
+                "\t\t}, {\n" +
+                "\t\t\t\"key\": \"name\",\n" +
+                "\t\t\t\"label\": \"卡面副标题\",\n" +
+                "\t\t\t\"value\": \"XX车钥匙\"\n" +
+                "\t\t}, {\n" +
+                "\t\t\t\"key\": \"logo\",\n" +
+                "\t\t\t\"value\": \"https://assets.stickpng.com/thumbs/5ec3e2b458550c000442773f.png\"\n" +
+                "\t\t}, {\n" +
+                "\t\t\t\"label\": \"卡面主标题\",\n" +
+                "\t\t\t\"key\": \"merchantName\",\n" +
+                "\t\t\t\"value\": \"我的车\"\n" +
+                "\t\t}, {\n" +
+                "\t\t\t\"key\": \"picUrl\",\n" +
+                "\t\t\t\"value\": \"https://assets.stickpng.com/thumbs/580b57fcd9996e24bc43c499.png\"\n" +
+                "\t\t}],\n" +
+                "\t\t\"appendFields\": [{\n" +
+                "\t\t\t\"key\": \"isCreateWhiteCard\",\n" +
+                "\t\t\t\"value\": \"true\",\n" +
+                "\t\t\t\"label\": \"NFCCardFlag\"\n" +
+                "\t\t}]\n" +
+                "\t},\n" +
+                "\t\"passVersion\": \"1.0\",\n" +
+                "\t\"passStyleIdentifier\": \"DigitalCarKeyHonorTestTemplate\",\n" +
+                "\t\"organizationName\": \"XX汽车\",\n" +
+                "\t\"timeStamp\": 1739262189000\n" +
+                "\t}";
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            JsonNode jsonNode = objectMapper.readTree(jsonString);
+            JsonNode sortedJson = sortJsonNode(jsonNode);
+            String sortedJsonString = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(sortedJson);
+            System.out.println(sortedJsonString);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static JsonNode sortJsonNode(JsonNode jsonNode) {
+        if (jsonNode.isObject()) {
+            ObjectNode sortedObjectNode = new ObjectMapper().createObjectNode();
+            // 使用 TreeMap 按照 key 排序
+            TreeMap<String, JsonNode> sortedMap = new TreeMap<>();
+            jsonNode.fields().forEachRemaining(entry -> sortedMap.put(entry.getKey(), entry.getValue()));
+            for (Map.Entry<String, JsonNode> entry : sortedMap.entrySet()) {
+                sortedObjectNode.set(entry.getKey(), sortJsonNode(entry.getValue()));
+            }
+            return sortedObjectNode;
+        } else if (jsonNode.isArray()) {
+            List<JsonNode> nodeList = new ArrayList<>();
+            jsonNode.forEach(nodeList::add);
+            // 对列表中的对象进行排序
+            nodeList.sort(Comparator.comparing(
+                    a -> {
+                        JsonNode keyNode = a.get("key");
+                        return (keyNode != null) ? keyNode.asText() : "";
+                    }
+            ));
+            ArrayNode sortedArrayNode = new ObjectMapper().createArrayNode();
+            for (JsonNode node : nodeList) {
+                // 对每个对象的 key, label, value 进行排序
+                if (node.isObject()) {
+                    ObjectNode sortedNode = sortJsonObject(node);
+                    sortedArrayNode.add(sortedNode);
+                } else {
+                    sortedArrayNode.add(node);
+                }
+            }
+            return sortedArrayNode;
+        }
+        return jsonNode; // 返回原始值
+    }
+
+    private static ObjectNode sortJsonObject(JsonNode jsonNode) {
+        ObjectNode sortedObjectNode = new ObjectMapper().createObjectNode();
+        // 使用 TreeMap 按照 key 排序
+        TreeMap<String, JsonNode> sortedMap = new TreeMap<>();
+        jsonNode.fields().forEachRemaining(entry -> sortedMap.put(entry.getKey(), entry.getValue()));
+        for (Map.Entry<String, JsonNode> entry : sortedMap.entrySet()) {
+            sortedObjectNode.set(entry.getKey(), entry.getValue());
+        }
+        return sortedObjectNode;
+    }
+}
+            </pre>
+        </div>
+        <h2>&ensp;</h2>
+        <div class="code-container" id="expected-container">
+            <h3 class="code-title">预期结果（请使用示例中的数据验证结果是否一致）</h3>
+            <pre>
+{
+  "fields" : {
+    "appendFields" : [ {
+      "key" : "isCreateWhiteCard",
+      "label" : "NFCCardFlag",
+      "value" : "true"
+    } ],
+    "commonFields" : [ {
+      "key" : "backgroundImage",
+      "value" : "https://assets.stickpng.com/thumbs/580b585b2edbce24c47b2ca9.png"
+    }, {
+      "key" : "logo",
+      "value" : "https://assets.stickpng.com/thumbs/5ec3e2b458550c000442773f.png"
+    }, {
+      "key" : "merchantName",
+      "label" : "卡面主标题",
+      "value" : "我的车"
+    }, {
+      "key" : "name",
+      "label" : "卡面副标题",
+      "value" : "XX车钥匙"
+    }, {
+      "key" : "picUrl",
+      "value" : "https://assets.stickpng.com/thumbs/580b57fcd9996e24bc43c499.png"
+    } ]
+  },
+  "organizationName" : "XX汽车",
+  "passStyleIdentifier" : "DigitalCarKeyHonorTestTemplate",
+  "passTypeIdentifier" : "OEM_XX",
+  "passVersion" : "1.0",
+  "timeStamp" : 1739262189000
+}
+            </pre>
+        </div>
+    </div>
+</body>
+</html>
