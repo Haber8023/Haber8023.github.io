@@ -76,13 +76,63 @@
                         MessageDigest digest = MessageDigest.getInstance("SHA-256");
                         return digest.digest(input.getBytes(StandardCharsets.UTF_8));
                     }
-                    
+                
                     public static void main(String[] args) {
-                        
-                        byte[] hashValue = HashUtil.sha256(data);
-                        
+                        String data = "{\n" +
+                                "  \"fields\" : {\n" +
+                                "    \"appendFields\" : [ {\n" +
+                                "      \"key\" : \"isCreateWhiteCard\",\n" +
+                                "      \"label\" : \"NFCCardFlag\",\n" +
+                                "      \"value\" : \"true\"\n" +
+                                "    } ],\n" +
+                                "    \"commonFields\" : [ {\n" +
+                                "      \"key\" : \"backgroundImage\",\n" +
+                                "      \"value\" : \"https://assets.stickpng.com/thumbs/580b585b2edbce24c47b2ca9.png\"\n" +
+                                "    }, {\n" +
+                                "      \"key\" : \"logo\",\n" +
+                                "      \"value\" : \"https://assets.stickpng.com/thumbs/5ec3e2b458550c000442773f.png\"\n" +
+                                "    }, {\n" +
+                                "      \"key\" : \"merchantName\",\n" +
+                                "      \"label\" : \"卡面主标题\",\n" +
+                                "      \"value\" : \"我的车\"\n" +
+                                "    }, {\n" +
+                                "      \"key\" : \"name\",\n" +
+                                "      \"label\" : \"卡面副标题\",\n" +
+                                "      \"value\" : \"XX车钥匙\"\n" +
+                                "    }, {\n" +
+                                "      \"key\" : \"picUrl\",\n" +
+                                "      \"value\" : \"https://assets.stickpng.com/thumbs/580b57fcd9996e24bc43c499.png\"\n" +
+                                "    } ]\n" +
+                                "  },\n" +
+                                "  \"organizationName\" : \"XX汽车\",\n" +
+                                "  \"passStyleIdentifier\" : \"DigitalCarKeyHonorTestTemplate\",\n" +
+                                "  \"passTypeIdentifier\" : \"OEM_XX\",\n" +
+                                "  \"passVersion\" : \"1.0\",\n" +
+                                "  \"timeStamp\" : 1739262189000\n" +
+                                "}";
+                
+                        try {
+                            byte[] hashValue = HashUtil.sha256(data);
+                            // 将字节数组转换为十六进制字符串
+                            StringBuilder hexString = new StringBuilder();
+                            for (byte b : hashValue) {
+                                String hex = String.format("%02x", b & 0xFF); // 转换为两位十六进制
+                                hexString.append(hex);
+                            }
+                            System.out.println(hexString);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
                     }
-                }
+                } 
+            </pre>
+        </div>
+
+        <h2>&ensp;</h2>
+        <div class="code-container" id="expected-container">
+            <h3 class="code-title">预期结果（请使用示例中的数据验证结果是否一致）</h3>
+            <pre>
+adbffd6da7d54ef5bc2d0309dba6a97500f961f9738b083c43bf0fd84c36ee6e
             </pre>
         </div>
     </div>
