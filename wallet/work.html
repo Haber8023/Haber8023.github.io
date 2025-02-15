@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>加班时间计算器</title>
+    <style>
+        .container { padding: 20px; max-width: 400px; }
+        input, button { margin: 10px 0; padding: 8px; }
+        #result { color: #333; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h3>加班时间计算器</h3>
+        <input type="time" id="startTime" step="300">
+        <button onclick="calculate()">计算下班时间</button>
+        <div id="result"></div>
+    </div>
+
+    <script>
+        function calculate() {
+            const startTime = document.getElementById('startTime').value;
+            const [startH, startM] = startTime.split(':').map(Number);
+            
+            // 时间转换分钟数函数
+            const toMinutes = (h, m) => h * 60 + m;
+            
+            // 有效工作时间段
+            const workPeriods = [
+                { start: toMinutes(8,30), end: toMinutes(12,30) },   // 上午
+                { start: toMinutes(14,0), end: toMinutes(22,0) }     // 下午
+            ];
+
+            let totalMinutes = 0;
+            let currentTime = toMinutes(startH, startM);
+            let remaining = 8 * 60;  // 需要工作8小时（480分钟）
+
+            while (remaining > 0) {
+                // 查找当前所在时间段
+                const period = workPeriods.find(p => 
+                    currentTime >= p.start && currentTime < p.end
+                );
+
+                if (!period) { // 非工作时间段
+                    currentTime = workPeriods.find(p => p.start > currentTime)?.start || 0;
+                    continue;
+                }
+
+                const available = period.end - currentTime;
+                const workTime = Math.min(available, remaining);
+                
+                totalMinutes += workTime;
+                remaining -= workTime;
+                currentTime += workTime;
+
+                // 跳转到下一个时间段
+                if (currentTime >= period.end && remaining > 0) {
+                    currentTime = workPeriods.find(p => p.start > currentTime)?.start || 0;
+                }
+            }
+
+            // 转换分钟数为时间格式
+            const endH = Math.floor(currentTime / 60);
+            const endM = currentTime % 60;
+            const endTime = `${endH.toString().padStart(2, '0')}:${endM.toString().padStart(2, '0')}`;
+
+            document.getElementById('result').innerHTML = 
+                `下班时间：<span style="color:#e74c3c">${endTime}</span>`;
+        }
+    </script>
+</body>
+</html>
