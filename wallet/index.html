@@ -274,6 +274,8 @@
                 <h5>seid计算</h5>
                 <input type="text" style="width:40%" id="cplc-input" placeholder="请输入CPLC">
                 <button onclick="calculateSeid()">确定</button>
+                <h5>输出结果</h5>
+            <div><textarea class="result-textarea" id="seid-output" value=""></textarea></div>
             </div>
             <div id="tsm-card-locker" class="content">
                 <div class="input-box">
@@ -301,10 +303,11 @@
                     <input type="text" id="deeplink-extra" placeholder="">
                 </div>
                 <button onclick="genDeepLink()">确定</button>
-            </div>
-            <h5>输出结果</h5>
+                <h5>输出结果</h5>
             <div><textarea class="result-textarea" id="deeplink-output" value="?businessId=&action=&cid=&pageId=&extra="></textarea></div>
             <button onclick="jumpDeepLink()">跳转</button>
+            </div>
+            
         </div>
     </div>
     <script>
@@ -616,45 +619,46 @@ xhr.onreadystatechange = function () {
         }
 
         function calculateShangHaiCardFaceNo(uid) {
-            var uidHex = uid.slice(-8);
-            var byteArray = [];
-            for (var i = 0; i < uidHex.length; i += 2) {
-                byteArray.push(parseInt(uidHex.substr(i, 2), 16));
-            }   
-            var uidBCD = 0;
-            for (var j = 0; j < byteArray.length; j++) {
-                uidBCD = (uidBCD << 8) | (byteArray[j] & 0xFF);
-            }
-            var sum = 0;
-            var isEven = true;
-            var temp = uidBCD;
-            while (temp > 0) {
-                var digit = temp % 10;
-                if (isEven) {
-                    sum += (digit * 2) % 10 + Math.floor((digit * 2) / 10);
-                } else {
-                    sum += digit;
-                }
-                temp = Math.floor(temp / 10);
-                isEven = !isEven;
-            }
-            var checkNum = ((10 - (sum % 10)) % 10).toString();
-            var bcdString = uidBCD.toString().padStart(10, '0');
-            var reversedBCDString = '';
-            for (var k = bcdString.length - 1; k >= 0; k -= 2) {
-                if (k > 0) {
-                    reversedBCDString += bcdString[k - 1] + bcdString[k];
-                }
-            }
-            return checkNum + reversedBCDString;
-        }
+  var uidHex = uid.slice(-8);
+  var byteArray = [];
+  for (var i = 0; i < uidHex.length; i += 2) {
+    byteArray.push(parseInt(uidHex.substr(i, 2), 16));
+  }
+  var uidBCD = 0n; // 用 BigInt
+  for (var j = 0; j < byteArray.length; j++) {
+    uidBCD = (uidBCD << 8n) | BigInt(byteArray[j] & 0xFF);
+  }
+  var sum = 0;
+  var isEven = true;
+  var temp = uidBCD;
+  while (temp > 0) {
+    var digit = Number(temp % 10n); // 转成普通数做乘法
+    if (isEven) {
+      sum += (digit * 2) % 10 + Math.floor((digit * 2) / 10);
+    } else {
+      sum += digit;
+    }
+    temp = temp / 10n;
+    isEven = !isEven;
+  }
+  var checkNum = ((10 - (sum % 10)) % 10).toString();
+  var bcdString = uidBCD.toString().padStart(10, '0');
+  var reversedBCDString = '';
+  for (var k = bcdString.length - 1; k >= 0; k -= 2) {
+    if (k > 0) {
+      reversedBCDString += bcdString[k - 1] + bcdString[k];
+    }
+  }
+  return checkNum + reversedBCDString;
+}
+
     </script>
     <script>
         /*
          * CPLC助手
          */
          function calculateSeid() {
-            document.getElementById("tsm-output").innerText = "";
+            document.getElementById("seid-output").innerText = "";
             var cplc = document.getElementById("cplc-input").value;
             var CPLC_MIN_LENGTH = 36;
             var seid = null;
@@ -662,7 +666,7 @@ xhr.onreadystatechange = function () {
             if (cplc.length >= CPLC_MIN_LENGTH) {
                 seid = (cplc.substring(0, 4) + cplc.substring(20, 36)).toUpperCase();
             }
-            document.getElementById("tsm-output").innerText = seid;
+            document.getElementById("seid-output").innerText = seid;
         }
 
         function genDeepLink() {
